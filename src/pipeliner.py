@@ -7,7 +7,6 @@ import re
 import json
 
 
-# https://cau-git.rz.uni-kiel.de/MIKI/impetus/llm-utils/-/blob/main/reformatting.py
 def clean_string(input_string):
     # Note order at which string is cleaned matters!
 
