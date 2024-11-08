@@ -1,10 +1,8 @@
 version: "3"
 services:
-  llama-agent-service:
+  allergy-extraction-service:
     image: allergy-extraction-service
     env_file: .env
-    volumes:
-      - /opt/allergy-extraction-service:/app
     restart: unless-stopped
     logging:
       driver: 'json-file'

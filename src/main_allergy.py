@@ -3,7 +3,6 @@ from src.model import *
 from fhir_exporter import export
 from collections import namedtuple
 import difflib
-import os
 import json
 
 substance_types = ["food", "medication", "environment", "biologic"]

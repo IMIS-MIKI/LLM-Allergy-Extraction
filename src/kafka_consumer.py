@@ -1,7 +1,7 @@
 import os
 import json
-from logging_config import logger
 from datetime import datetime
+from src.logging_config import logger
 from src.main_allergy import run_llm_allergy
 
 from dotenv import load_dotenv
