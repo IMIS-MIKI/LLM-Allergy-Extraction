@@ -4,19 +4,9 @@ from typing import List
 import enum
 import json
 
-ALLERGY_CODE_PATH = "codes/allergy.json"
-ALLERGY_PROCESSED_PATH = "codes/allergy_processed.json"
+
 SUBSTANCE_CODE_PATH = "codes/substance.json"
 FINDING_CODE_PATH = "codes/finding.json"
-
-
-def get_codes_as_list():
-    temp = ' '
-    codes = get_all_codes_from_csv()
-
-    for item in codes:
-        temp += item + " : " + str(codes[item]) + " ; "
-    return temp
 
 
 def get_all_substances_from_csv():
@@ -25,25 +15,10 @@ def get_all_substances_from_csv():
     return codes
 
 
-def get_all_codes_from_csv():
-    with open(ALLERGY_CODE_PATH, 'r') as file:
-        codes = json.load(file)
-    return codes
-
-
-def get_all_allergy_processed_from_csv():
-    with open(ALLERGY_PROCESSED_PATH, 'r') as file:
-        codes = json.load(file)
-    return codes
-
-
 def get_all_findings_from_csv():
     with open(FINDING_CODE_PATH, 'r') as file:
         codes = json.load(file)
     return codes
-
-
-Allergy_Codes = enum.Enum('Allergy_Codes', get_all_codes_from_csv())
 
 
 class AllergyIntolerance_DE(BaseModel):
