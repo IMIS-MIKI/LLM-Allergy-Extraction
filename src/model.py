@@ -149,23 +149,33 @@ def get_ReactionExtraction():
 
 class ReactionExtraction(BaseModel):
     reactions: List[str] = Field(description=""" 
+    Task: You will be provided with a substance and a text in the format "substance | text".
 
-    Task: A substance and a text will be provided (substance | text). Identify in the text if there are reactions associated to allergy or intolerance to the provided substance.
-    If there are return them in English, otherwise return nothing.
+    Your goal is to identify only the reactions that are explicitly associated with an allergy or intolerance to the given substance in the text.
 
-    Example text 1: "Mouse Epitheleum | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel"
-    Answer 1: Exanthema, Erythema, Dyspnoea, Feeling ill
+    Rules:
+    - Only return reactions that are directly linked to the specified substance.
+    - Do not return reactions associated with any other substances.
+    - If no reactions are found for the specified substance, return nothing.
+    - Translate all reactions to English.
 
-    Example text 2: "Nickel | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel"
-    Answer 2: 
-    
-    Example text 3: "Paracetamol | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel"
-    Answer 3: 
+    Examples:
 
-    Example text 4: "Paracetamol | Haut kühl und trocken. Kein Ikterus, keine Zyanose, keine Ödeme. Allergien: Morphium- (Krankheitsgefühl), Paracetamol (Dyspnoe)."
-    Answer 4: Dyspnoe
+    Example 1:
+    Input: Mouse Epithelium | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel
+    Output: Exanthema, Erythema, Dyspnoea, Feeling ill
 
-    Objective: Extract from the text reactions to the specified substance.
+    Example 2:
+    Input: Nickel | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel
+    Output: 
+
+    Example 3:
+    Input: Paracetamol | OP bei Katarakt 2023. Allergien: Paracetamol + Mausepithel (jeweils Exanthem/Erythem, Dyspnoe, Krankheitsgefühl), Nickel
+    Output: 
+
+    Example 4:
+    Input: Paracetamol | Haut kühl und trocken. Kein Ikterus, keine Zyanose, keine Ödeme. Allergien: Morphium- (Krankheitsgefühl), Paracetamol (Dyspnoe).
+    Output: Dyspnoea
     """)
 
 

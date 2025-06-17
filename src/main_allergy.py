@@ -4,6 +4,7 @@ from src.fhir_exporter import export
 from collections import namedtuple
 import difflib
 import json
+from src.logging_config import logger
 
 substance_types = ["food", "medication", "environment", "biologic"]
 substance_tuple = namedtuple('Substance', ['code', 'display', 'category', 'mechanism'])
@@ -89,7 +90,7 @@ def get_reactions_for_substance(llm_model, text, allergy, document_id):
     if not bool(res_all_reactions['outcomes'][0]):
         res_all_reactions['outcomes'][0]['reactions'] = list()
 
-    for reaction in res_all_reactions['outcomes'][0]['reactions']:
+    for reaction in res_all_reactions['outcomes'][0].get('reactions', []):
         matches = difflib.get_close_matches(reaction, findings_keys, cutoff=0.5, n=20)
 
         text_search_match = f"Main reaction: '{reaction}' List of reactions: {matches}"
@@ -138,9 +139,12 @@ def run_llm_allergy(llm_model, text, patient_id, store_locally=False):
 
     result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
 
-    result["allergies"] = dict()
+    logger.info(result)
 
-    for allergy in result['outcomes'][0]['allergies']:
+    result["allergies"] = dict()
+    result["reactions"] = dict()
+
+    for allergy in result['outcomes'][0].get('allergies', []):
         result["allergies"][allergy] = get_substance_for_allergy(llm_model, allergy, patient_id)
         result["reactions"][allergy] = get_reactions_for_substance(llm_model, text, allergy, patient_id)
 
