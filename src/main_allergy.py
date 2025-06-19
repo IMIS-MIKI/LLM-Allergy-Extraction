@@ -18,6 +18,7 @@ findings_keys = list(findings.keys())
 reaction_tuple = namedtuple('Reaction', ['code', 'display', 'severity'])
 severity_types = ["mild", "moderate", "severe", "undefined"]
 
+
 def get_substance_for_allergy(llm_model, allergy, document_id):
     # Get Substance
     matches = difflib.get_close_matches(allergy, substances_keys, cutoff=0.5, n=20)
@@ -135,7 +136,7 @@ def get_reactions_for_substance(llm_model, text, allergy, document_id):
     return result
 
 
-def run_llm_allergy(llm_model, text, patient_id, store_locally=False):
+def run_llm_allergy(llm_model, text, patient_id, store_locally=False, output_type="Fhir"):
 
     result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
 
@@ -152,7 +153,10 @@ def run_llm_allergy(llm_model, text, patient_id, store_locally=False):
         with open('experiment/kafka_' + patient_id, 'w') as fp:
             json.dump(result, fp, ensure_ascii=False, indent=4)
 
-    if result["allergies"]:
+    if not result["allergies"]:
+        return
+
+    if output_type == "Fhir":
         bundle = export(patient_id, patient_id, result["allergies"], result["reactions"])
 
         if store_locally:
@@ -160,3 +164,36 @@ def run_llm_allergy(llm_model, text, patient_id, store_locally=False):
                 json.dump(bundle.dict(), fp, ensure_ascii=False, indent=4)
 
         return bundle.dict()
+
+    if output_type == "elastic_json":
+        output = []
+        logger.info(result)
+        for allergy in result["allergies"]:
+            logger.info("Allergy")
+            logger.info(result["allergies"][allergy])
+            logger.info("Reaction")
+            logger.info(result["reactions"][allergy])
+            reactions_data = []
+            for reaction in result["reactions"][allergy]:
+                logger.info(reaction)
+                reactions_data.append({"display": reaction.display,
+                                        "code": reaction.code,
+                                        "severity": reaction.severity})
+                logger.info(reactions_data)
+            if result["allergies"][allergy] == []:
+                allergy_data = {"display": allergy,
+                            "reactions": reactions_data}
+            else:
+                allergy_data = {"display": result["allergies"][allergy].display,
+                            "code": result["allergies"][allergy].code,
+                            "reactions": reactions_data}
+            logger.info(allergy_data)
+            output.append(allergy_data)
+        return output
+
+
+
+
+
+
+

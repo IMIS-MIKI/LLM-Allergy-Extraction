@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from kafka.consumer import KafkaConsumer
 from kafka.producer import KafkaProducer
 from pydantic import BaseModel
+from src.pipeliner import clean_string
 
 load_dotenv(verbose=True)
 
@@ -16,6 +17,7 @@ load_dotenv(verbose=True)
 class Task(BaseModel):
     text: str
     patient_id: str
+    output_type: str
     metadata: dict
 
 
@@ -33,7 +35,8 @@ def safe_json_deserializer(x):
     try:
         # Decode from bytes
         s = x.decode("utf-8")
-        
+
+        s = clean_string(s)
         # Replace raw control characters with spaces (or escape them)
         s = re.sub(r'(?<!\\)[\n\r\t]', ' ', s)
 
@@ -95,19 +98,21 @@ def start_consumer():
             
             metadata = payload['metadata']
             text = payload['text']
+            # logger.info(text)
             patient_id = payload['patient_id']
+            output_type = payload['output_type']
 
             # Here comes your processing
             start = datetime.now()
-            fhir_bundle_dict = run_llm_allergy(ollama_model, text, patient_id)
+            output = run_llm_allergy(ollama_model, text, patient_id, output_type=output_type)
             end = datetime.now()
 
             # Note might be empty if no allergies are found
-            if not fhir_bundle_dict:
+            if not output:
                 continue
 
             res = dict()
-            res['response'] = fhir_bundle_dict
+            res['response'] = output
             res['metadata'] = metadata
             res['metadata']['duration'] = str(end - start)
 
