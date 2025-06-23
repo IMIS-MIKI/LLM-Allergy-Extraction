@@ -136,25 +136,12 @@ def get_reactions_for_substance(llm_model, text, allergy, document_id):
     return result
 
 
-def run_llm_allergy(llm_model, text, patient_id, store_locally=False, output_type="Fhir"):
+def run_llm_allergy(llm_model, text, patient_id, run_rag=False, store_locally=False, output_type="Fhir"):
 
-    result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
-
-    logger.info(result)
-
-    result["allergies"] = dict()
-    result["reactions"] = dict()
-
-    for allergy in result['outcomes'][0].get('allergies', []):
-        result["allergies"][allergy] = get_substance_for_allergy(llm_model, allergy, patient_id)
-        result["reactions"][allergy] = get_reactions_for_substance(llm_model, text, allergy, patient_id)
-
-    if store_locally:
-        with open('experiment/kafka_' + patient_id, 'w') as fp:
-            json.dump(result, fp, ensure_ascii=False, indent=4)
-
-    if not result["allergies"]:
-        return
+    if run_rag:
+        result = run_llm_allergy_rag(llm_model, text, patient_id, store_locally=store_locally)
+    else:
+        result = run_llm_allergy_default(llm_model, text, patient_id, store_locally=store_locally)
 
     if output_type == "Fhir":
         bundle = export(patient_id, patient_id, result["allergies"], result["reactions"])
@@ -189,11 +176,54 @@ def run_llm_allergy(llm_model, text, patient_id, store_locally=False, output_typ
                             "reactions": reactions_data}
             logger.info(allergy_data)
             output.append(allergy_data)
+
         return output
 
 
+def run_llm_allergy_default(llm_model, text, patient_id, store_locally=False):
+
+    result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
+
+    logger.info(result)
+
+    result["allergies"] = dict()
+    result["reactions"] = dict()
+
+    for allergy in result['outcomes'][0].get('allergies', []):
+        result["allergies"][allergy] = get_substance_for_allergy(llm_model, allergy, patient_id)
+        result["reactions"][allergy] = get_reactions_for_substance(llm_model, text, allergy, patient_id)
+
+    if store_locally:
+        with open('experiment/kafka_' + patient_id, 'w') as fp:
+            json.dump(result, fp, ensure_ascii=False, indent=4)
+
+    if not result["allergies"]:
+        return
+
+    return result
 
 
+def run_llm_allergy_rag(llm_model, text, patient_id, store_locally=False):
+
+    result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
+
+    logger.info(result)
+
+    result["allergies"] = dict()
+    result["reactions"] = dict()
+
+    for allergy in result['outcomes'][0].get('allergies', []):
+        result["allergies"][allergy] = get_substance_for_allergy(llm_model, allergy, patient_id)
+        result["reactions"][allergy] = get_reactions_for_substance(llm_model, text, allergy, patient_id)
+
+    if store_locally:
+        with open('experiment/kafka_' + patient_id, 'w') as fp:
+            json.dump(result, fp, ensure_ascii=False, indent=4)
+
+    if not result["allergies"]:
+        return
+
+    return result
 
 
 
