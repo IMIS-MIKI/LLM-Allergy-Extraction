@@ -1,6 +1,10 @@
 from langchain_core.output_parsers import StrOutputParser, SimpleJsonOutputParser
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import Ollama
+from langchain.chat_models import ChatOpenAI
+from langchain.output_parsers import SimpleJsonOutputParser
+from langchain.prompts import PromptTemplate
+import openai
 
 import os
 import re
@@ -76,7 +80,33 @@ def run_text(llm_model, document_id, text, prompt_model):
     return res
 
 
-def run_llm(prompt_template: PromptTemplate, prompt_variables_list: list[dict], model: str | None = None):
+def run_llm(prompt_template: PromptTemplate, prompt_variables_list: list[dict], model: str | None = None, library="vllm"):
+    if library == "vllm":
+        return run_llm_vllm(prompt_template, prompt_variables_list, model)
+    elif library == "ollama":
+        return run_llm_ollama(prompt_template, prompt_variables_list, model)
+
+
+def run_llm_vllm(prompt_template, prompt_variables_list):
+    vllm_host = os.getenv("VLLM_HOST")
+    llm = ChatOpenAI(
+        model=os.getenv('VLLM_MODEL'),
+        temperature=0.1,
+        openai_api_key="EMPTY",
+        openai_api_base=f"{vllm_host}/v1",
+    )
+
+    llm_chain = prompt_template | llm | SimpleJsonOutputParser()
+
+    responses = []
+    for prompt_vars in prompt_variables_list:
+        resp = llm_chain.invoke(prompt_vars)
+        responses.append(resp)
+
+    return responses
+
+
+def run_llm_ollama(prompt_template: PromptTemplate, prompt_variables_list: list[dict], model: str | None = None):
     ollama_host = os.getenv('OLLAMA_HOST')
     llm = Ollama(format="json", temperature=0.1, base_url=ollama_host, model=model)
     llm_chain = prompt_template | llm | SimpleJsonOutputParser()

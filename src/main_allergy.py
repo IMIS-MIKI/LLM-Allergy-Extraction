@@ -51,7 +51,7 @@ def get_substance_for_allergy(llm_model, allergy, document_id):
     text_mechanism = substance + " | " + allergy
 
     res_mechanism = run_text(llm_model=llm_model, document_id=document_id, text=text_mechanism,
-                              prompt_model=get_Mechanism())
+                             prompt_model=get_Mechanism())
 
     res_mechanism = res_mechanism["outcomes"][0]
 
@@ -80,7 +80,6 @@ def get_substance_for_allergy(llm_model, allergy, document_id):
 
 
 def get_reactions_for_substance(llm_model, text, allergy, document_id):
-
     text_reactions = allergy + " | " + text
     res_all_reactions = run_text(llm_model=llm_model, document_id=document_id, text=text_reactions,
                                  prompt_model=get_ReactionExtraction())
@@ -131,13 +130,13 @@ def get_reactions_for_substance(llm_model, text, allergy, document_id):
             res_reaction_severity_key = {'severity': ['undefined']}
 
         severity_reaction = res_reaction_severity_key["severity"][0]
-        result.append(reaction_tuple(findings[target_reaction], target_reaction, severity_reaction))  # ['code', 'display', 'severity'])
+        result.append(reaction_tuple(findings[target_reaction], target_reaction,
+                                     severity_reaction))  # ['code', 'display', 'severity'])
 
     return result
 
 
 def run_llm_allergy(llm_model, text, patient_id, run_rag=False, store_locally=False, output_type="Fhir"):
-
     if run_rag:
         result = run_llm_allergy_rag(llm_model, text, patient_id, store_locally=store_locally)
     else:
@@ -164,16 +163,16 @@ def run_llm_allergy(llm_model, text, patient_id, run_rag=False, store_locally=Fa
             for reaction in result["reactions"][allergy]:
                 logger.info(reaction)
                 reactions_data.append({"display": reaction.display,
-                                        "code": reaction.code,
-                                        "severity": reaction.severity})
+                                       "code": reaction.code,
+                                       "severity": reaction.severity})
                 logger.info(reactions_data)
             if result["allergies"][allergy] == []:
                 allergy_data = {"display": allergy,
-                            "reactions": reactions_data}
+                                "reactions": reactions_data}
             else:
                 allergy_data = {"display": result["allergies"][allergy].display,
-                            "code": result["allergies"][allergy].code,
-                            "reactions": reactions_data}
+                                "code": result["allergies"][allergy].code,
+                                "reactions": reactions_data}
             logger.info(allergy_data)
             output.append(allergy_data)
 
@@ -181,7 +180,6 @@ def run_llm_allergy(llm_model, text, patient_id, run_rag=False, store_locally=Fa
 
 
 def run_llm_allergy_default(llm_model, text, patient_id, store_locally=False):
-
     result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
 
     logger.info(result)
@@ -204,7 +202,7 @@ def run_llm_allergy_default(llm_model, text, patient_id, store_locally=False):
 
 
 def run_llm_allergy_rag(llm_model, text, patient_id, store_locally=False):
-
+    # TODO: Update everything to use rag instead
     result = run_text(llm_model=llm_model, document_id=patient_id, text=text, prompt_model=get_AllergyExtraction())
 
     logger.info(result)
@@ -224,6 +222,3 @@ def run_llm_allergy_rag(llm_model, text, patient_id, store_locally=False):
         return
 
     return result
-
-
-
