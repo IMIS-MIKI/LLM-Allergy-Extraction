@@ -2,7 +2,6 @@ from langchain_core.output_parsers import StrOutputParser, SimpleJsonOutputParse
 from langchain.prompts import PromptTemplate
 from langchain_community.llms import Ollama
 from langchain.chat_models import ChatOpenAI
-from langchain.output_parsers import SimpleJsonOutputParser
 from langchain.prompts import PromptTemplate
 import openai
 
@@ -80,17 +79,17 @@ def run_text(llm_model, document_id, text, prompt_model):
     return res
 
 
-def run_llm(prompt_template: PromptTemplate, prompt_variables_list: list[dict], model: str | None = None, library="vllm"):
+def run_llm(prompt_template: PromptTemplate, prompt_variables_list: list[dict], model: str | None = None, library="ollama"):
     if library == "vllm":
         return run_llm_vllm(prompt_template, prompt_variables_list, model)
     elif library == "ollama":
         return run_llm_ollama(prompt_template, prompt_variables_list, model)
 
 
-def run_llm_vllm(prompt_template, prompt_variables_list):
+def run_llm_vllm(prompt_template, prompt_variables_list, model):
     vllm_host = os.getenv("VLLM_HOST")
     llm = ChatOpenAI(
-        model=os.getenv('VLLM_MODEL'),
+        model=model if model else os.getenv('VLLM_MODEL'),
         temperature=0.1,
         openai_api_key="EMPTY",
         openai_api_base=f"{vllm_host}/v1",
