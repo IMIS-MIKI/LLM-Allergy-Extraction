@@ -55,6 +55,9 @@ class AllergyIntoleranceExtraction(BaseModel):
     Example text 3: "Allergien: Mausepithel, Morphium-."
     Answer 3: Mouse epithelium, Morphium
     
+    Example text 4: "Sie besuchte die Hauptschule und begann eine Ausbildung zur Kosmetikerin. Diese musste sie aufgrund von Allergien abbrechen."
+    Answer 4: 
+    
     Objective: Translate the text into English and use the information in the text to determine whether the patient has allergies and output the allergies as a list.
     If no allergies are mentioned, do not provide any outcome.
     """)
@@ -176,6 +179,18 @@ class ReactionExtraction(BaseModel):
     Example 4:
     Input: Paracetamol | Haut kühl und trocken. Kein Ikterus, keine Zyanose, keine Ödeme. Allergien: Morphium- (Krankheitsgefühl), Paracetamol (Dyspnoe).
     Output: Dyspnoea
+    
+    Example 5:
+    Input: House dust mite (Bt) specific IgE | Herr Macedo klagt über eine Allergie gegen Hausstaubmilben und Nickel.
+    Output:
+    
+    Example 6:
+    Input: Lasix | Die zunächst eingeleitete Therapie mit Lasix musste im Verlauf auch auf Torem umgestellt werden, da die Patientin allergisch reagiert hat.
+    Output:
+    
+    Example 7:
+    Input: Pollen | Bei Herrn Macedo besteht eine Allergie gegen Tierhaare, Pollen und Toilettenpapier.
+    Output:
     """)
 
 
